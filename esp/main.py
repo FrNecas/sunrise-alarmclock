@@ -1,6 +1,18 @@
+import network
+import utime
 from ds3231 import DS3231
 from machine import Pin, I2C, PWM
 from time import sleep
+from ujson import loads
+from umqtt.simple import MQTTClient
+
+# MQTT server settings
+SERVER = '192.168.1.110'
+CLIENT = 'ESP_32_SUNRISE_ALARM'
+TOPIC = 'home/alarm'
+
+TIME_FILE = 'time.txt'
+WIFI_FILE = 'wifi.txt'
 
 # How long it takes for the LEDs to reach full brightness
 SUNRISE_LENGTH = 1800
@@ -27,7 +39,7 @@ LEDS = [
     PWM(Pin(26, Pin.OUT), freq=70, duty=0),
 ]
 
-with open('time.txt', 'r') as infile:
+with open(TIME_FILE, 'r') as infile:
     t = infile.read().splitlines()
     ALARM_HOURS, ALARM_MINUTES, ALARM_SECONDS = int(t[0]), int(t[1]), int(t[2])
 
@@ -98,6 +110,72 @@ def update_leds(alarm_hours, alarm_minutes, alarm_seconds):
         led.duty(duty)
 
 
-while True:
-    update_leds(ALARM_HOURS, ALARM_MINUTES, ALARM_SECONDS)
-    sleep(1)
+def connect_wifi():
+    """Connects to the WI-FI"""
+    with open(WIFI_FILE, 'r') as wifi:
+        data = wifi.read().splitlines()
+        ssid, password = data[0], data[1]
+    sta_if = network.WLAN(network.STA_IF)
+    if not sta_if.isconnected():
+        print('Connecting to network')
+        sta_if.active(True)
+        sta_if.connect(ssid, password)
+        while not sta_if.isconnected():
+            pass
+
+    print('Network config:', sta_if.ifconfig())
+
+
+def on_message(topic, msg):
+    """Receive MQTT message, update the alarm and the storage file."""
+    global ALARM_HOURS, ALARM_MINUTES, ALARM_SECONDS
+    try:
+        json =  loads(msg)
+    except ValueError:
+        print('Invalid format')
+        return
+    try:
+        hours, minutes, seconds = json['hours'], json['minutes'], json['seconds']
+        if 0 <= hours <= 23 and 0 <= minutes <= 59 and 0 <= seconds <= 59:
+            ALARM_HOURS, ALARM_MINUTES, ALARM_SECONDS = hours, minutes, seconds
+            with open(TIME_FILE, 'w') as outfile:
+                outfile.write('{}\n{}\n{}'.format(hours, minutes, seconds))
+        else:
+            print('Invalid values')
+            return
+    except KeyError:
+        print('Field not found')
+        return
+
+
+def epoch():
+    # Convert DS.datetime() to a format used by utime.mktime
+    # (year, month, day, hour, minute, second, weekday, yearday)
+    t = DS.datetime()
+    wd = t.pop(3)
+    t.append(wd)
+    t.append(1)
+    return utime.mktime(t)
+
+
+connect_wifi()
+c = MQTTClient(CLIENT, SERVER)
+c.set_callback(on_message)
+c.connect()
+c.subscribe(TOPIC)
+update_seconds = mqtt_seconds = epoch()
+
+try:
+    while True:
+        secs = epoch()
+        if secs - mqtt_seconds >= 60:
+            # Check MQTT message every 60 seconds
+            mqtt_seconds = secs
+            c.check_msg()
+        if secs - update_seconds >= 1:
+            # Update LED intensity every second
+            update_seconds = secs
+            update_leds(ALARM_HOURS, ALARM_MINUTES, ALARM_SECONDS)
+        sleep(1)
+finally:
+    c.disconnect()
