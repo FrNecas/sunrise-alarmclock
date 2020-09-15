@@ -13,15 +13,34 @@ body {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Opera and Firefox */
 }
-.time-picker {
+
+.time-selector {
   display:flex;
   align-items:center;
+}
+
+.time-picker {
+  display:flex;
+  flex-direction: column;
+  align-items: center;
   position: absolute;
   left: 50%;
   top: 50%;
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
+
+.confirm{
+  margin-top: 20px;
+  width: 100px;
+  height: 50px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15pt;
+  background-color: #121212;
+}
+
 .tp-col {
   display:flex;
   flex-direction:column;
@@ -31,7 +50,7 @@ body {
   padding:4px 4px ;
   width:60px;
   text-align:center;
-  font-size:40pt;
+  font-size:45pt;
 }
 .tp-up-arrow,.tp-down-arrow {
   cursor:pointer;

@@ -4,7 +4,8 @@ $(document).ready(function(){
   var min=parseInt(c_time.split(':')[1]);
   $('.tp-min>span').html(min < 10 ? '0' + min : min);
   $('.tp-hr>span').html(hr);
-  $('.tp-hr>.tp-down-arrow').on('mousedown touchstart', function(){
+  $('.tp-hr>.tp-down-arrow').on('mousedown touchstart', function(e){
+    e.preventDefault()
     change_hr(-1);
     var counter = 0;
     decrement = setInterval(function(){
@@ -12,23 +13,29 @@ $(document).ready(function(){
         change_hr(-1);
       }
       counter++;
-    }, 100);
+    }, 150);
   }).bind('mouseup mouseleave touchend', function(){
-    clearInterval(decrement);
+    try {
+      clearInterval(decrement);
+    } catch (e) {}
   });
-  $('.tp-min>.tp-down-arrow').on('mousedown touchstart', function(){
+  $('.tp-min>.tp-down-arrow').on('mousedown touchstart', function(e){
+    e.preventDefault()
     change_min(-1);
     var counter = 0;
-    increment = setInterval(function(){
+    decrement = setInterval(function(){
       if (counter > 1) {
         change_min(-1);
       }
       counter++;
-    }, 100);
+    }, 150);
   }).bind('mouseup mouseleave touchend', function(){
-    clearInterval(increment);
+    try {
+      clearInterval(decrement)
+    } catch (e) {}
   });
-  $('.tp-hr>.tp-up-arrow').on('mousedown touchstart', function(){
+  $('.tp-hr>.tp-up-arrow').on('mousedown touchstart', function(e){
+    e.preventDefault()
     change_hr(1);
     var counter = 0;
     increment = setInterval(function(){
@@ -36,11 +43,14 @@ $(document).ready(function(){
         change_hr(1);
       }
       counter++;
-    }, 100);
+    }, 150);
   }).bind('mouseup mouseleave touchend', function(){
-    clearInterval(increment);
+    try {
+      clearInterval(increment);
+    } catch (e) {}
   });
-  $('.tp-min>.tp-up-arrow').on('mousedown touchstart', function(){
+  $('.tp-min>.tp-up-arrow').on('mousedown touchstart', function(e){
+    e.preventDefault()
     change_min(1);
     var counter = 0;
     increment = setInterval(function(){
@@ -48,9 +58,19 @@ $(document).ready(function(){
         change_min(1);
       }
       counter++;
-    }, 100);
+    }, 150);
   }).bind('mouseup mouseleave touchend', function(){
-    clearInterval(increment);
+    try {
+      clearInterval(increment);
+    } catch(e) {
+
+    }
+  });
+
+  $('.confirm').click(function(){
+    var hr = parseInt($('.tp-hr>span').html());
+    var min = parseInt($('.tp-min>span').html());
+    $.post('/alarm', {'hours': hr, 'minutes': min})
   });
 });
 

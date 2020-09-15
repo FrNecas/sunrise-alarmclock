@@ -8,19 +8,24 @@
     <script src="{{ url_for('static', filename='js/clock.js') }}"></script>
 {% endblock %}
 {% block content %}
-<div class="time-picker">
-    <div class="tp-col tp-hr">
-        <i class="fas fa-chevron-up tp-up-arrow noselect"></i>
-        <span class="noselect">00</span>
-        <i class="fas fa-chevron-down tp-down-arrow noselect"></i>
+    <div class="time-picker">
+        <div class="time-selector">
+            <div class="tp-col tp-hr">
+                <i class="fas fa-chevron-up tp-up-arrow noselect"></i>
+                <span class="noselect">00</span>
+                <i class="fas fa-chevron-down tp-down-arrow noselect"></i>
+            </div>
+            <div class="tp-col">
+                <span>:</span>
+            </div>
+            <div class="tp-col tp-min">
+                <i class="fas fa-chevron-up tp-up-arrow noselect"></i>
+                <span class="noselect">00</span>
+                <i class="fas fa-chevron-down tp-down-arrow noselect"></i>
+            </div>
+        </div>
+        <div>
+            <button type="button" class="confirm">Set!</button>
+        </div>
     </div>
-<div class="tp-col">
-    <span class="noselect">:</span>
-</div>
-<div class="tp-col tp-min">
-    <i class="fas fa-chevron-up tp-up-arrow noselect"></i>
-    <span class="noselect">00</span>
-    <i class="fas fa-chevron-down tp-down-arrow noselect"></i>
-</div>
-</div>
 {% endblock %}
