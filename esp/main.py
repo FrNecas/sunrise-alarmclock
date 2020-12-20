@@ -28,16 +28,7 @@ DUTY_DIFF = MAX_DUTY - LOW_THRESHOLD_DUTY
 
 i2c = I2C(sda=Pin(4), scl=Pin(16))
 DS = DS3231(i2c)
-LEDS = [
-    PWM(Pin(17, Pin.OUT), freq=70, duty=0),
-    PWM(Pin(18, Pin.OUT), freq=70, duty=0),
-    PWM(Pin(19, Pin.OUT), freq=70, duty=0),
-    PWM(Pin(21, Pin.OUT), freq=70, duty=0),
-    PWM(Pin(22, Pin.OUT), freq=70, duty=0),
-    PWM(Pin(33, Pin.OUT), freq=70, duty=0),
-    PWM(Pin(25, Pin.OUT), freq=70, duty=0),
-    PWM(Pin(26, Pin.OUT), freq=70, duty=0),
-]
+LED = PWM(Pin(17, Pin.OUT), freq=70, duty=0)
 
 with open(TIME_FILE, 'r') as infile:
     t = infile.read().splitlines()
@@ -106,8 +97,7 @@ def calculate_duty(alarm_hours, alarm_minutes, alarm_seconds):
 
 def update_leds(alarm_hours, alarm_minutes, alarm_seconds):
     duty = calculate_duty(alarm_hours, alarm_minutes, alarm_seconds)
-    for led in LEDS:
-        led.duty(duty)
+    LED.duty(duty)
 
 
 def connect_wifi():
